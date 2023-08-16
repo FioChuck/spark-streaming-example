@@ -1,0 +1,34 @@
+name: CI CD
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup java 17 deployment
+        uses: actions/setup-java@v2
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          check-latest: true
+
+      - name: build fat jar
+        run: sbt assembly
+
+      - name: authenticate with gcp
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: ${{secrets.GCP_SA_KEY}}
+
+      - name: deploy fat jar to gcs
+        uses: "google-github-actions/upload-cloud-storage@v1"
+        with:
+          path: "target/scala-2.12"
+          destination: "cf-spark-jobs/streaming-demo"
+          glob: "*.jar"
+          gzip: false

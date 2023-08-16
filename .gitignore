@@ -1,0 +1,11 @@
+*.class
+*.cache
+*.log
+.bloop/
+.bsp/
+.vscode
+.scalafmt.conf
+project/project/
+project/target/
+target/
+.metals/
