@@ -6,7 +6,6 @@ import org.apache.spark.sql.Column
 import org.apache.spark.ml.linalg.SQLDataTypes
 import org.apache.hadoop.security.UserGroupInformation
 import io.delta.tables._
-// import spark.implicits._
 
 object StreamingDemo {
   def main(args: Array[String]): Unit = {
@@ -52,11 +51,11 @@ object StreamingDemo {
       )
     )
 
-    // // val df =
-    // //   spark.readStream
-    // //     .schema(simpleSchema)
-    // //     .json("gs://cf-data-temp/spark-input/*")
-    // //     .withColumn("event_time", to_timestamp($"time"))
+    val df =
+      spark.readStream
+        .schema(simpleSchema)
+        .json("gs://cf-data-temp/spark-input/*")
+        .withColumn("event_time", to_timestamp($"time"))
 
     val df_delta =
       spark.readStream
@@ -64,25 +63,20 @@ object StreamingDemo {
         .json("gs://cf-data-temp/spark-input/*")
         .withColumn("event_time", to_timestamp($"time"))
 
-    // df.writeStream
-    //   .format("bigquery")
-    //   .option("temporaryGcsBucket", "cf-spark-temp")
-    //   // .option("writeMethod", "direct")
-    //   .option("checkpointLocation", "gs://cf-data-temp/spark-checkpoint/")
-    //   .outputMode("append")
-    //   .start(
-    //     "cf-data-analytics.spark_example.streaming"
-    //   )
-    // print(current_timestamp())
-    // // df_delta.show()
+    df.writeStream
+      .format("bigquery")
+      .option("temporaryGcsBucket", "cf-spark-temp")
+      // .option("writeMethod", "direct")
+      .option("checkpointLocation", "gs://cf-data-temp/spark-checkpoint/")
+      .outputMode("append")
+      .start(
+        "cf-data-analytics.spark_example.streaming"
+      )
 
     val df_out = df_delta
-      // .withColumn("timestamp", current_timestamp())
       .withWatermark("event_time", "5 minutes")
       .groupBy(window($"event_time", "1 minutes"))
       .count() // streaming transformation
-
-    // // df_out.show()
 
     val query = df_out.writeStream
       .format("delta")
