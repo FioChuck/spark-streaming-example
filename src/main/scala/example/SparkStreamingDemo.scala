@@ -18,6 +18,11 @@ object StreamingDemo {
     val spark = SparkSession.builder
       .appName("Autoscaling Demo")
       .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+      .config(
+        "spark.sql.catalog.spark_catalog",
+        "org.apache.spark.sql.delta.catalog.DeltaCatalog"
+      )
       // .config("spark.master", "local[16]") // local dev
       // .config(
       //   "spark.hadoop.fs.AbstractFileSystem.gs.impl",
