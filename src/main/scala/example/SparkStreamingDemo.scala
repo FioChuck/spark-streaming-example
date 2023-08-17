@@ -37,12 +37,6 @@ object StreamingDemo {
 
     import spark.implicits._
 
-    // val test =
-    //   spark.read.format("delta").load("gs://cf-data-temp/spark-delta/")
-
-    // test.head()
-
-    // print("done")
     val simpleSchema = StructType(
       Array(
         StructField("name", StringType, true),
@@ -76,7 +70,7 @@ object StreamingDemo {
     val df_out = df_delta
       .withWatermark("event_time", "5 minutes")
       .groupBy(window($"event_time", "1 minutes"))
-      .count() // streaming transformation
+      .count()
 
     val query = df_out.writeStream
       .format("delta")
@@ -88,45 +82,8 @@ object StreamingDemo {
 
     print(query.lastProgress)
 
-    // print(query.explain)
-
-    // // df.writeStream
-    // //   .format("delta")
-    // //   .outputMode("append")
-    // //   .option("checkpointLocation", "gs://cf-data-temp/spark-checkpoint-delta/")
-    // //   .start(
-    // //     "gs://cf-data-temp/spark-delta/"
-    // //   )
-
     spark.streams
       .awaitAnyTermination() // block until any one of the streams terminates
-
-    // val df_delta =
-    //   spark.read
-    //     .schema(simpleSchema)
-    //     .json("gs://cf-data-temp/spark-input/*")
-    //     .withColumn("event_time", to_timestamp($"time"))
-
-    // // df_delta.head()
-
-    // print("done")
-
-    // val df_out = df_delta
-    //   // .withColumn("timestamp", current_timestamp())
-    //   // .withWatermark("timestamp", "5 minutes")
-    //   .groupBy(window($"timestamp", "1 minutes"))
-    //   .count() // streaming transformation
-
-    // df_out.write
-    //   .format("delta")
-    //   // .outputMode("append")
-    //   // .option("checkpointLocation", "gs://cf-data-temp/spark-checkpoint-delta/")
-    //   .save(
-    //     "gs://cf-data-temp/spark-delta/"
-    //   )
-    // df_out.explain()
-
-    // print("done")
 
   }
 }
